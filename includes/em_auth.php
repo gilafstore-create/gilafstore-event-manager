@@ -12,7 +12,25 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Include existing database connection (read-only)
-require_once __DIR__ . '/../../includes/db_connect.php';
+// Try multiple paths for localhost vs production compatibility
+$dbPaths = [
+    __DIR__ . '/../../includes/db_connect.php',           // Localhost: public_html/event-manager/includes -> public_html/includes
+    __DIR__ . '/../../../includes/db_connect.php',        // Production: /event-manager/includes -> /includes
+    $_SERVER['DOCUMENT_ROOT'] . '/includes/db_connect.php' // Absolute fallback
+];
+
+$dbConnected = false;
+foreach ($dbPaths as $path) {
+    if (file_exists($path)) {
+        require_once $path;
+        $dbConnected = true;
+        break;
+    }
+}
+
+if (!$dbConnected) {
+    die('Event Manager Error: Could not locate database connection file. Please ensure includes/db_connect.php exists.');
+}
 
 /**
  * Check if user is authenticated as admin
