@@ -12,24 +12,59 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Include existing database connection (read-only)
-// Try multiple paths for localhost vs production compatibility
-$dbPaths = [
-    __DIR__ . '/../../includes/db_connect.php',           // Localhost: public_html/event-manager/includes -> public_html/includes
-    __DIR__ . '/../../../includes/db_connect.php',        // Production: /event-manager/includes -> /includes
-    $_SERVER['DOCUMENT_ROOT'] . '/includes/db_connect.php' // Absolute fallback
-];
-
-$dbConnected = false;
-foreach ($dbPaths as $path) {
-    if (file_exists($path)) {
-        require_once $path;
-        $dbConnected = true;
-        break;
+// Universal path detection for localhost and production
+if (!defined('EM_DB_LOADED')) {
+    $dbConnected = false;
+    
+    // Method 1: Traverse up from current directory
+    $currentDir = __DIR__;
+    for ($i = 0; $i < 5; $i++) {
+        $testPath = $currentDir . '/includes/db_connect.php';
+        if (file_exists($testPath)) {
+            require_once $testPath;
+            $dbConnected = true;
+            break;
+        }
+        $currentDir = dirname($currentDir);
     }
-}
-
-if (!$dbConnected) {
-    die('Event Manager Error: Could not locate database connection file. Please ensure includes/db_connect.php exists.');
+    
+    // Method 2: Use DOCUMENT_ROOT
+    if (!$dbConnected && isset($_SERVER['DOCUMENT_ROOT'])) {
+        $docRoot = rtrim($_SERVER['DOCUMENT_ROOT'], '/\\');
+        $paths = [
+            $docRoot . '/includes/db_connect.php',
+            $docRoot . '/public_html/includes/db_connect.php',
+        ];
+        foreach ($paths as $path) {
+            if (file_exists($path)) {
+                require_once $path;
+                $dbConnected = true;
+                break;
+            }
+        }
+    }
+    
+    // Method 3: Relative paths as fallback
+    if (!$dbConnected) {
+        $relativePaths = [
+            __DIR__ . '/../../includes/db_connect.php',
+            __DIR__ . '/../../../includes/db_connect.php',
+            __DIR__ . '/../../../../includes/db_connect.php',
+        ];
+        foreach ($relativePaths as $path) {
+            if (file_exists($path)) {
+                require_once $path;
+                $dbConnected = true;
+                break;
+            }
+        }
+    }
+    
+    if (!$dbConnected) {
+        die('Event Manager Error: Could not locate database connection file. Searched in multiple locations. Please ensure includes/db_connect.php exists in your web root.');
+    }
+    
+    define('EM_DB_LOADED', true);
 }
 
 /**
