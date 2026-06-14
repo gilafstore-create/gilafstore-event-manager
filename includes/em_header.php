@@ -232,7 +232,7 @@ $userName = em_get_user_name();
                 </a>
 
                 <div class="em-nav-divider"></div>
-                <a href="<?= base_url('admin/index.php'); ?>" class="em-nav-link">
+                <a href="<?= function_exists('getAdminUrl') ? getAdminUrl('index.php') : (function_exists('base_url') ? base_url('admin/index.php') : '/admin/index.php'); ?>" class="em-nav-link">
                     <i class="fas fa-arrow-left"></i>
                     <span>Back to Admin</span>
                 </a>
