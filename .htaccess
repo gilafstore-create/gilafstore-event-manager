@@ -1,0 +1,18 @@
+# Event Manager - URL Rewriting
+# NO MODIFICATIONS to existing .htaccess rules
+
+RewriteEngine On
+
+# Prevent directory listing
+Options -Indexes
+
+# Protect sensitive files
+<FilesMatch "\.(md|sql|log)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Pretty URLs (optional - can be enabled later)
+# RewriteCond %{REQUEST_FILENAME} !-f
+# RewriteCond %{REQUEST_FILENAME} !-d
+# RewriteRule ^(.*)$ index.php?path=$1 [QSA,L]

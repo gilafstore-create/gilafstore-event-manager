@@ -1,0 +1,94 @@
+Event Manager - Files to Upload to Production Server
+=======================================================
+
+Upload these files from your local XAMPP to Hostinger:
+
+PHASE 3C & 4 - NEW FILES:
+-------------------------
+
+1. event-manager/includes/em_queue.php
+2. event-manager/workers/queue_worker.php
+3. event-manager/pages/event-operations/queue-status.php
+4. event-manager/pages/crm-hub/manage-connections.php
+5. event-manager/api/queue_retry.php
+6. event-manager/api/event_retry.php
+7. event-manager/api/crm_connections.php
+8. event-manager/api/crm_test.php
+9. event-manager/api/export_audit_logs.php
+
+MODIFIED FILES:
+--------------
+
+10. event-manager/includes/em_header.php (updated navigation)
+11. event-manager/pages/event-operations/failed-events.php (added retry button)
+12. event-manager/pages/crm-hub/connections.php (updated notices)
+13. event-manager/pages/crm-hub/retry-history.php (updated notices)
+14. event-manager/pages/crm-hub/webhook-config.php (updated notices)
+15. event-manager/pages/governance/audit-trail.php (added export)
+
+DOCUMENTATION (Optional):
+------------------------
+
+16. event-manager/PHASE_3C_4_README.md
+17. event-manager/IMPLEMENTATION_SUMMARY.md
+18. event-manager/PENDING_ITEMS_AUDIT.md
+19. event-manager/FINAL_COMPLETION_REPORT.md
+20. event-manager/QUICK_START_GUIDE.md
+21. event-manager/SETUP_CHECKLIST.md
+22. event-manager/test_setup.php
+23. event-manager/run_setup_test.bat (Windows only)
+24. event-manager/run_queue_worker.bat (Windows only)
+
+HOW TO UPLOAD:
+-------------
+
+Method 1: FTP/SFTP (Recommended)
+1. Open FileZilla or your FTP client
+2. Connect to gilafstore.com
+3. Navigate to: /public_html/event-manager/
+4. Upload all files maintaining the folder structure
+
+Method 2: cPanel File Manager
+1. Login to cPanel
+2. Open File Manager
+3. Navigate to: public_html/event-manager/
+4. Upload files one by one or as a zip
+
+Method 3: Git (If using version control)
+1. Commit all changes locally
+2. Push to your repository
+3. Pull on production server
+
+VERIFY UPLOAD:
+-------------
+
+After uploading, test these URLs:
+
+1. https://gilafstore.com/event-manager/pages/crm-hub/manage-connections.php
+   Should show: Manage CRM Connections page
+
+2. https://gilafstore.com/event-manager/pages/event-operations/queue-status.php
+   Should show: Queue Status page
+
+3. https://gilafstore.com/event-manager/api/crm_connections.php
+   Should show: 401 Unauthorized (correct - needs login)
+
+IMPORTANT:
+---------
+
+- Maintain exact folder structure
+- Don't skip any files
+- Upload workers/ folder completely
+- Upload api/ folder completely
+- Check file permissions after upload (644 for PHP files)
+- Make queue_worker.php executable (755)
+
+AFTER UPLOAD:
+------------
+
+1. Set up cron job on Hostinger (see QUICK_START_GUIDE.md)
+2. Test the manage-connections.php page
+3. Create your first CRM connection
+4. Monitor queue status
+
+Need help? Check QUICK_START_GUIDE.md for detailed instructions.
