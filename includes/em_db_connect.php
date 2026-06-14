@@ -1,39 +1,66 @@
 <?php
 /**
- * Event Manager - Standalone Database Connection
- * Works on both localhost and production without external dependencies
+ * Event Manager - Multi-Domain Database Connection
+ * Auto-detects: localhost, gilafstore.com, gilafkashmirifoods.in
+ * ZERO manual configuration required
  */
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Auto-detect environment
-$isLocal = (
-    php_sapi_name() === 'cli' ||
-    (isset($_SERVER['HTTP_HOST']) && (
-        $_SERVER['HTTP_HOST'] === 'localhost' ||
-        strpos($_SERVER['HTTP_HOST'], '127.0.0.1') !== false ||
-        strpos($_SERVER['HTTP_HOST'], '::1') !== false ||
-        strpos($_SERVER['HTTP_HOST'], '192.168.') !== false
-    )) ||
-    (isset($_SERVER['SERVER_NAME']) && strpos($_SERVER['SERVER_NAME'], 'localhost') !== false)
-);
-
-// Database credentials
-if ($isLocal) {
-    // Localhost (XAMPP)
-    define('EM_DB_HOST', 'localhost');
-    define('EM_DB_NAME', 'ecommerce_db');
-    define('EM_DB_USER', 'root');
-    define('EM_DB_PASS', '');
+// Load multi-domain configuration system
+$multiDomainConfigPath = __DIR__ . '/../../includes/multi_domain_config.php';
+if (file_exists($multiDomainConfigPath)) {
+    require_once $multiDomainConfigPath;
+    $dbConfig = getDatabaseConfig();
 } else {
-    // Production (Hostinger)
-    define('EM_DB_HOST', 'localhost');
-    define('EM_DB_NAME', 'u237768108_gilafstore');
-    define('EM_DB_USER', 'u237768108_gilafstore');
-    define('EM_DB_PASS', '1Gfs@#$222');
+    // Fallback: Auto-detect environment (standalone mode)
+    $isLocal = (
+        php_sapi_name() === 'cli' ||
+        (isset($_SERVER['HTTP_HOST']) && (
+            $_SERVER['HTTP_HOST'] === 'localhost' ||
+            strpos($_SERVER['HTTP_HOST'], '127.0.0.1') !== false ||
+            strpos($_SERVER['HTTP_HOST'], '::1') !== false ||
+            strpos($_SERVER['HTTP_HOST'], '192.168.') !== false
+        )) ||
+        (isset($_SERVER['SERVER_NAME']) && strpos($_SERVER['SERVER_NAME'], 'localhost') !== false)
+    );
+    
+    if ($isLocal) {
+        $dbConfig = [
+            'host' => 'localhost',
+            'name' => 'ecommerce_db',
+            'user' => 'root',
+            'pass' => '',
+        ];
+    } else {
+        // Check domain for multi-site support
+        $host = $_SERVER['HTTP_HOST'] ?? '';
+        if (strpos($host, 'gilafkashmirifoods.in') !== false) {
+            $dbConfig = [
+                'host' => 'localhost',
+                'name' => 'u237768108_gilafkashmiri',
+                'user' => 'u237768108_gilafkashmiri',
+                'pass' => '',
+            ];
+        } else {
+            // Default: gilafstore.com
+            $dbConfig = [
+                'host' => 'localhost',
+                'name' => 'u237768108_gilafstore',
+                'user' => 'u237768108_gilafstore',
+                'pass' => '1Gfs@#$222',
+            ];
+        }
+    }
 }
+
+// Define database constants
+define('EM_DB_HOST', $dbConfig['host']);
+define('EM_DB_NAME', $dbConfig['name']);
+define('EM_DB_USER', $dbConfig['user']);
+define('EM_DB_PASS', $dbConfig['pass']);
 
 // Create PDO connection
 try {
